@@ -27,16 +27,16 @@ COPY nginx.conf /etc/nginx/nginx.conf
 
 # Создаем пользователя nginx для безопасности
 RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nextjs -u 1001
+    adduser -S react -u 1001
 
 # Устанавливаем права на файлы
-RUN chown -R nextjs:nodejs /usr/share/nginx/html && \
-    chown -R nextjs:nodejs /var/cache/nginx && \
-    chown -R nextjs:nodejs /var/log/nginx && \
-    chown -R nextjs:nodejs /etc/nginx/conf.d
+RUN chown -R react:nodejs /usr/share/nginx/html && \
+    chown -R react:nodejs /var/cache/nginx && \
+    chown -R react:nodejs /var/log/nginx && \
+    chown -R react:nodejs /etc/nginx/conf.d
 
 # Переключаемся на пользователя nginx
-USER nextjs
+USER react
 
 # Открываем порт 80
 EXPOSE 80

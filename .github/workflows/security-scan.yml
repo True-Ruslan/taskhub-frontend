@@ -17,21 +17,33 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Check if Docker image exists
+        id: check-image
+        run: |
+          # Check if the image exists in the registry
+          if docker manifest inspect ghcr.io/${{ github.repository }}:latest >/dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
+        if: steps.check-image.outputs.exists == 'true'
+        uses: aquasecurity/trivy-action@v0.19.0
         with:
           image-ref: 'ghcr.io/${{ github.repository }}:latest'
           format: 'sarif'
           output: 'trivy-results.sarif'
 
       - name: Upload Trivy scan results to GitHub Security tab
+        if: always() && steps.check-image.outputs.exists == 'true'
         uses: github/codeql-action/upload-sarif@v3
-        if: always()
         with:
           sarif_file: 'trivy-results.sarif'
 
       - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/docker@master
+        if: steps.check-image.outputs.exists == 'true'
+        uses: snyk/actions/docker@v1.0.0
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
@@ -46,7 +58,13 @@ jobs:
           output-file: hadolint-results.sarif
 
       - name: Upload Hadolint results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
         if: always()
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: 'hadolint-results.sarif'
+
+      - name: Skip security scan
+        if: steps.check-image.outputs.exists == 'false'
+        run: |
+          echo "⚠️ Docker image not found. Skipping security scan."
+          echo "Build the image first using the docker-build workflow."

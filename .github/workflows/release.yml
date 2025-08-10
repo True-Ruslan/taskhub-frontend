@@ -20,35 +20,34 @@ jobs:
         id: get_version
         run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
 
+      - name: Setup GitHub CLI
+        uses: cli/setup-gh@v2
+
       - name: Create Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ steps.get_version.outputs.VERSION }}
-          body: |
-            ## What's Changed
+        run: |
+          gh release create ${{ steps.get_version.outputs.VERSION }} \
+            --title "Release ${{ steps.get_version.outputs.VERSION }}" \
+            --notes "## What's Changed
             
-            This release includes:
-            - Docker image: `ghcr.io/${{ github.repository }}:${{ steps.get_version.outputs.VERSION }}`
-            - Latest tag: `ghcr.io/${{ github.repository }}:latest`
-            
-            ## Docker Usage
-            
-            ```bash
-            # Pull the specific version
-            docker pull ghcr.io/${{ github.repository }}:${{ steps.get_version.outputs.VERSION }}
-            
-            # Or use latest
-            docker pull ghcr.io/${{ github.repository }}:latest
-            ```
-            
-            ## Changelog
-            
-            See the [commit history](https://github.com/${{ github.repository }}/compare/...${{ github.ref }}) for detailed changes.
-          draft: false
-          prerelease: false
+          This release includes:
+          - Docker image: \`ghcr.io/${{ github.repository }}:${{ steps.get_version.outputs.VERSION }}\`
+          - Latest tag: \`ghcr.io/${{ github.repository }}:latest\`
+          
+          ## Docker Usage
+          
+          \`\`\`bash
+          # Pull the specific version
+          docker pull ghcr.io/${{ github.repository }}:${{ steps.get_version.outputs.VERSION }}
+          
+          # Or use latest
+          docker pull ghcr.io/${{ github.repository }}:latest
+          \`\`\`
+          
+          ## Changelog
+          
+          See the [commit history](https://github.com/${{ github.repository }}/compare/...${{ github.ref }}) for detailed changes." \
+            --draft=false \
+            --prerelease=false
 
       - name: Update package.json version
         run: |
