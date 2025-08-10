@@ -1,46 +1,157 @@
-# Getting Started with Create React App
+# TaskHub Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+React приложение для управления задачами с автоматической сборкой и развертыванием через GitHub CI/CD.
 
-## Available Scripts
+## 🚀 Быстрый старт
 
-In the project directory, you can run:
+### Локальная разработка
 
-### `npm start`
+```bash
+# Установка зависимостей
+npm install
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+# Запуск в режиме разработки
+npm start
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+# Запуск тестов
+npm test
 
-### `npm test`
+# Сборка для продакшена
+npm run build
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Docker (продакшен)
 
-### `npm run build`
+```bash
+# Сборка и запуск продакшен образа
+docker-compose up
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+# Только сборка
+docker build -t taskhub-frontend .
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Docker (разработка)
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```bash
+# Запуск в режиме разработки с hot reload
+docker-compose --profile dev up taskhub-frontend-dev
+```
 
-### `npm run eject`
+## 🔧 GitHub CI/CD
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+Проект настроен для автоматической сборки и развертывания через GitHub Actions:
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Workflows
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+1. **Test and Quality Check** - тестирование и проверка качества кода
+2. **Build and Push Docker Image** - сборка и публикация Docker образа в GitHub Packages
+3. **Deploy Application** - автоматическое развертывание (требует настройки)
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+### Автоматические триггеры
 
-## Learn More
+- **Push** в ветки `main` или `develop` - запуск тестов и сборка Docker образа
+- **Pull Request** в ветки `main` или `develop` - запуск тестов
+- **Теги** `v*` - релиз с публикацией Docker образа
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### Docker образы
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Docker образы автоматически публикуются в GitHub Container Registry:
+
+- **Latest**: `ghcr.io/{username}/taskhub-frontend:latest`
+- **По веткам**: `ghcr.io/{username}/taskhub-frontend:{branch-name}`
+- **По тегам**: `ghcr.io/{username}/taskhub-frontend:{version}`
+
+## 📦 Структура проекта
+
+```
+taskhub-frontend/
+├── .github/workflows/     # GitHub Actions workflows
+├── components/            # React компоненты
+├── src/                  # Исходный код
+├── public/               # Статические файлы
+├── Dockerfile            # Docker для продакшена
+├── Dockerfile.dev        # Docker для разработки
+├── docker-compose.yml    # Docker Compose конфигурация
+├── nginx.conf            # Nginx конфигурация
+└── package.json          # Зависимости и скрипты
+```
+
+## 🌐 Nginx конфигурация
+
+Включает:
+- Gzip сжатие
+- Кэширование статических файлов
+- Поддержка React Router (SPA)
+- Health check endpoint
+- API проксирование (настраивается)
+
+## 🔒 Безопасность
+
+- Docker образы запускаются от непривилегированного пользователя
+- Многоэтапная сборка для минимизации размера образа
+- Исключение чувствительных файлов через `.dockerignore`
+
+## 📋 Требования
+
+- Node.js 18+
+- Docker 20.10+
+- Docker Compose 2.0+
+
+## 🚀 Развертывание
+
+### GitHub Packages
+
+Docker образы автоматически публикуются в GitHub Container Registry при каждом push в main ветку.
+
+### Ручное развертывание
+
+```bash
+# Скачать образ
+docker pull ghcr.io/{username}/taskhub-frontend:latest
+
+# Запустить контейнер
+docker run -p 80:80 ghcr.io/{username}/taskhub-frontend:latest
+```
+
+### Kubernetes
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: taskhub-frontend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: taskhub-frontend
+  template:
+    metadata:
+      labels:
+        app: taskhub-frontend
+    spec:
+      containers:
+      - name: taskhub-frontend
+        image: ghcr.io/{username}/taskhub-frontend:latest
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+```
+
+## 🤝 Вклад в проект
+
+1. Fork репозитория
+2. Создайте feature ветку (`git checkout -b feature/amazing-feature`)
+3. Commit изменения (`git commit -m 'Add amazing feature'`)
+4. Push в ветку (`git push origin feature/amazing-feature`)
+5. Откройте Pull Request
+
+## 📄 Лицензия
+
+Этот проект лицензирован под MIT License.

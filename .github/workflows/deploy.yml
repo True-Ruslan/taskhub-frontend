@@ -1,0 +1,32 @@
+name: Deploy Application
+
+on:
+  workflow_run:
+    workflows: ["Build and Push Docker Image"]
+    types:
+      - completed
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to production
+        run: |
+          echo "Deployment to production would happen here"
+          echo "You can add your deployment logic:"
+          echo "- Deploy to Kubernetes cluster"
+          echo "- Deploy to cloud platform (AWS, Azure, GCP)"
+          echo "- Deploy to VPS or dedicated server"
+          echo "- Trigger external deployment service"
+          
+      - name: Notify deployment status
+        run: |
+          echo "✅ Application deployed successfully!"
+          echo "Docker image: ghcr.io/${{ github.repository }}:latest"
+          echo "Deployment time: $(date)"
