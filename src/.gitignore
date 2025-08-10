@@ -1,0 +1,10 @@
+# React файлы которые не нужны для Vanilla JS приложения
+react-app-env.d.ts
+index.tsx
+App.tsx
+App.test.tsx
+setupTests.ts
+reportWebVitals.ts
+logo.svg
+index.css
+App.css
