@@ -44,7 +44,7 @@ jobs:
             org.opencontainers.image.revision=${{ github.sha }}
 
       - name: Setup GitHub CLI
-        uses: cli/setup-gh@v2
+        uses: actions/setup-gh@v1
 
       - name: Create Release
         run: |
@@ -71,15 +71,6 @@ jobs:
           See the [commit history](https://github.com/${{ github.repository }}/compare/...${{ github.ref }}) for detailed changes." \
             --draft=false \
             --prerelease=false
-
-      - name: Update package.json version
-        run: |
-          npm version ${{ steps.get_version.outputs.VERSION }} --no-git-tag-version
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add package.json package-lock.json
-          git commit -m "Update version to ${{ steps.get_version.outputs.VERSION }}"
-          git push
 
       - name: Notify release
         run: |
